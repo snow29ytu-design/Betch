@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاطئ الملفات - رفع وتحميل الملفات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sand: #F4E4BC;
+            --light-blue: #87CEEB;
+            --blue: #1E90FF;
+            --dark-blue: #006994;
+            --white: #FFFFFF;
+            --dark-sand: #E6D3A3;
+            --error: #FF6B6B;
+            --success: #51CF66;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, var(--light-blue), var(--sand));
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" fill="%23F4E4BC"><path d="M0 0v46.29c47.79 22.2 103.59 32.17 158 28 70.36-5.37 136.33-33.31 206.8-37.5 73.84-4.36 147.54 16.88 218.2 35.26 69.27 18 138.3 24.88 209.4 13.08 36.15-6 69.85-17.84 104.45-29.34C989.49 25 1113-14.29 1200 52.47V0z" /></svg>');
+            background-size: 1200px 100px;
+            animation: wave 12s linear infinite;
+        }
+        
+        .wave:nth-child(2) {
+            bottom: 10px;
+            opacity: 0.5;
+            animation: wave 10s linear infinite reverse;
+        }
+        
+        .wave:nth-child(3) {
+            bottom: 15px;
+            opacity: 0.7;
+            animation: wave 15s linear infinite;
+        }
+        
+        @keyframes wave {
+            0% { background-position-x: 0; }
+            100% { background-position-x: 1200px; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+        
+        .auth-section {
+            position: absolute;
+            left: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .auth-btn {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .auth-btn:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+        }
+        
+        .auth-btn.logout {
+            background: var(--error);
+        }
+        
+        #userInfo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        #userName {
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-section {
+                position: static;
+                transform: none;
+                margin-top: 1rem;
+                justify-content: center;
+            }
+        }
+        
+        .upload-section, .files-section {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-blue);
+            border-bottom: 2px solid var(--sand);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--blue);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to bottom right, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+        
+        .upload-area:hover::before {
+            transform: rotate(45deg) translate(20px, 20px);
+        }
+        
+        .upload-area:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-color: var(--dark-blue);
+            transform: translateY(-5px);
+        }
+        
+        .upload-area.dragover {
+            background-color: rgba(135, 206, 235, 0.2);
+            border-color: var(--dark-blue);
+        }
+        
+        .upload-area i {
+            font-size: 4rem;
+            color: var(--blue);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+        
+        .upload-area p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .file-types {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 1.5rem 0;
+        }
+        
+        .file-type {
+            background-color: var(--sand);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, var(--blue), var(--dark-blue));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+        }
+        
+        .upload-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .upload-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        #searchInput, #sortSelect {
+            padding: 0.7rem 1rem;
+            border: 1px solid var(--sand);
+            border-radius: 8px;
+            font-size: 1rem;
+            flex: 1;
+        }
+        
+        #sortSelect {
+            flex: 0.5;
+        }
+        
+        .file-list {
+            list-style: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--sand);
+            transition: all 0.2s ease;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .file-item:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateX(5px);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .file-icon {
+            margin-left: 1rem;
+            font-size: 1.8rem;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .file-details {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            word-break: break-all;
+        }
+        
+        .file-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .download-btn, .delete-btn, .share-btn {
+            padding: 0.6rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            border: none;
+        }
+        
+        .download-btn {
+            background-color: var(--blue);
+            color: white;
+        }
+        
+        .download-btn:hover {
+            background-color: var(--dark-blue);
+        }
+        
+        .share-btn {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .share-btn:hover {
+            background-color: #40c057;
+        }
+        
+        .delete-btn {
+            background-color: var(--error);
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background-color: #FF5252;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            color: #555;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .upload-progress {
+            width: 100%;
+            height: 12px;
+            background-color: var(--sand);
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            display: none;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--dark-blue));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #777;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--sand);
+        }
+        
+        .palm-tree {
+            position: absolute;
+            bottom: 100px;
+            right: 5%;
+            font-size: 5rem;
+            color: #8DB600;
+            z-index: 0;
+            opacity: 0.7;
+        }
+        
+        .seagull {
+            position: absolute;
+            top: 15%;
+            left: 10%;
+            font-size: 2rem;
+            color: white;
+            animation: fly 15s linear infinite;
+        }
+        
+        @keyframes fly {
+            0% { transform: translateX(-100px) translateY(0); }
+            50% { transform: translateX(100px) translateY(-20px); }
+            100% { transform: translateX(300px) translateY(0); }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--sand);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--blue);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-blue);
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification.success {
+            background-color: var(--success);
+        }
+        
+        .notification.error {
+            background-color: var(--error);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @media (max-width: 480px) {
+            .file-actions {
+                flex-direction: column;
+            }
+            
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .file-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- موجات الشاطئ -->
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    
+    <!-- تزيين الشاطئ -->
+    <div class="palm-tree">
+        <i class="fas fa-tree"></i>
+    </div>
+    <div class="seagull">
+        <i class="fas fa-dove"></i>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-umbrella-beach"></i> شاطئ الملفات</h1>
+            <p>رفع ومشاركة ملفاتك في بيئة آمنة وجميلة</p>
+            <div class="auth-section" id="authSection">
+                <button id="loginBtn" class="auth-btn">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </button>
+                <div id="userInfo" style="display: none;">
+                    <span id="userName"></span>
+                    <button id="logoutBtn" class="auth-btn logout">
+                        <i class="fas fa-sign-out-alt"></i> خروج
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <section class="upload-section">
+                <h2 class="section-title"><i class="fas fa-cloud-upload-alt"></i> رفع ملف جديد</h2>
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-file-upload"></i>
+                    <p>اسحب الملفات هنا أو انقر للاختيار</p>
+                    <p class="file-size">الحد الأقصى للحجم: 50 ميجابايت</p>
+                    
+                    <div class="file-types">
+                        <span class="file-type">PDF</span>
+                        <span class="file-type">ZIP</span>
+                        <span class="file-type">صور</span>
+                        <span class="file-type">مستندات</span>
+                        <span class="file-type">فيديو</span>
+                    </div>
+                    
+                    <input type="file" id="fileInput" style="display: none;" multiple>
+                    <button class="upload-btn" id="uploadBtn">
+                        <i class="fas fa-upload"></i> رفع الملفات
+                    </button>
+                </div>
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-bar" id="progressBar"></div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+            </section>
+            
+            <section class="files-section">
+                <h2 class="section-title"><i class="fas fa-file"></i> الملفات المرفوعة</h2>
+                <div class="filters">
+                    <input type="text" id="searchInput" placeholder="ابحث في الملفات...">
+                    <select id="sortSelect">
+                        <option value="newest">الأحدث أولاً</option>
+                        <option value="oldest">الأقدم أولاً</option>
+                        <option value="name">حسب الاسم</option>
+                        <option value="size">حسب الحجم</option>
+                    </select>
+                </div>
+                <ul class="file-list" id="fileList">
+                    <div class="empty-state">
+                        <i class="fas fa-file"></i>
+                        <p>لا توجد ملفات مرفوعة بعد</p>
+                        <p>قم برفع أول ملف لرؤيته هنا</p>
+                    </div>
+                </ul>
+            </section>
+        </div>
+        
+        <footer>
+            <p>جميع الحقوق محفوظة &copy; 2023 - شاطئ الملفات</p>
+            <p>مشغل بـ Firebase</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <script>
+        // Firebase Configuration - استبدل هذه القيم ببيانات مشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyCxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase services
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const fileList = document.getElementById('fileList');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const authSection = document.getElementById('authSection');
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+
+        // State
+        let currentUser = null;
+        let files = [];
+
+        // Authentication
+        async function initAuth() {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    showUserInfo(user);
+                    await loadFiles();
+                } else {
+                    currentUser = null;
+                    showLoginButton();
+                    files = [];
+                    displayFiles();
+                }
+            });
+        }
+
+        function showUserInfo(user) {
+            loginBtn.style.display = 'none';
+            userInfo.style.display = 'flex';
+            userName.textContent = user.displayName || user.email;
+        }
+
+        function showLoginButton() {
+            loginBtn.style.display = 'flex';
+            userInfo.style.display = 'none';
+        }
+
+        async function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+                showNotification('تم تسجيل الدخول بنجاح!', 'success');
+            } catch (error) {
+                showNotification('خطأ في تسجيل الدخول: ' + error.message, 'error');
+            }
+        }
+
+        async function logout() {
+            try {
+                await auth.signOut();
+                showNotification('تم تسجيل الخروج بنجاح!', 'success');
+            } catch (error) {
+                showNotification('خطأ في تسجيل الخروج: ' + error.message, 'error');
+            }
+        }
+
+        // File Management - هذه هي الوظيفة الأساسية لحفظ الملفات في Firebase
+        async function uploadFile(file) {
+            if (!currentUser) {
+                showNotification('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+
+            if (file.size > 50 * 1024 * 1024) {
+                showNotification('حجم الملف يتجاوز 50 ميجابايت', 'error');
+                return;
+            }
+
+            try {
+                uploadProgress.style.display = 'block';
+                uploadBtn.disabled = true;
+                uploadArea.classList.add('loading');
+
+                // إنشاء مرجع للتخزين في Firebase Storage
+                const fileId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                const storageRef = storage.ref().child(`files/${currentUser.uid}/${fileId}_${file.name}`);
+                
+                // رفع الملف إلى Firebase Storage
+                const uploadTask = storageRef.put(file);
+                
+                // متابعة تقدم الرفع
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressBar.style.width = progress + '%';
+                        progressText.textContent = Math.round(progress) + '%';
+                    },
+                    (error) => {
+                        showNotification('خطأ في رفع الملف: ' + error.message, 'error');
+                        resetUploadUI();
+                    },
+                    async () => {
+                        // الحصول على رابط التحميل بعد اكتمال الرفع
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        
+                        // حفظ معلومات الملف في Firestore
+                        await db.collection('files').add({
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            downloadURL: downloadURL,
+                            owner: currentUser.uid,
+                            ownerName: currentUser.displayName || currentUser.email,
+                            uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            storagePath: uploadTask.snapshot.ref.fullPath
+                        });
+                        
+                        showNotification('تم رفع الملف بنجاح!', 'success');
+                        resetUploadUI();
+                        await loadFiles();
+                    }
+                );
+                
+            } catch (error) {
+                showNotification('خطأ في رفع الملف: ' + error.message, 'error');
+                resetUploadUI();
+            }
+        }
+
+        function resetUploadUI() {
+            uploadProgress.style.display = 'none';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+            uploadBtn.disabled = false;
+            uploadArea.classList.remove('loading');
+            fileInput.value = '';
+        }
+
+        // تحميل الملفات من Firebase
+        async function loadFiles() {
+            if (!currentUser) return;
+            
+            try {
+                const snapshot = await db.collection('files')
+                    .where('owner', '==', currentUser.uid)
+                    .orderBy('uploadedAt', 'desc')
+                    .get();
+                    
+                files = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                displayFiles();
+            } catch (error) {
+                showNotification('خطأ في تحميل الملفات: ' + error.message, 'error');
+            }
+        }
+
+        function displayFiles() {
+            if (files.length === 0) {
+                fileList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file"></i>
+                        <p>لا توجد ملفات مرفوعة بعد</p>
+                        <p>قم برفع أول ملف لرؤيته هنا</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let filteredFiles = [...files];
+            
+            // تطبيق البحث
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                filteredFiles = filteredFiles.filter(file => 
+                    file.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // تطبيق الترتيب
+            const sortBy = sortSelect.value;
+            switch (sortBy) {
+                case 'newest':
+                    filteredFiles.sort((a, b) => b.uploadedAt - a.uploadedAt);
+                    break;
+                case 'oldest':
+                    filteredFiles.sort((a, b) => a.uploadedAt - b.uploadedAt);
+                    break;
+                case 'name':
+                    filteredFiles.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'size':
+                    filteredFiles.sort((a, b) => b.size - a.size);
+                    break;
+            }
+            
+            fileList.innerHTML = filteredFiles.map(file => `
+                <li class="file-item">
+                    <div class="file-info">
+                        <span class="file-icon">${getFileIcon(file.type)}</span>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-meta">
+                                <span>${formatFileSize(file.size)}</span>
+                                <span>${formatDate(file.uploadedAt?.toDate())}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <a href="${file.downloadURL}" class="download-btn" download="${file.name}" target="_blank">
+                            <i class="fas fa-download"></i> تحميل
+                        </a>
+                        <button class="share-btn" onclick="shareFile('${file.downloadURL}')">
+                            <i class="fas fa-share"></i> مشاركة
+                        </button>
+                        <button class="delete-btn" onclick="deleteFile('${file.id}', '${file.storagePath}')">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // حذف الملف من Firebase Storage و Firestore
+        async function deleteFile(fileId, storagePath) {
+            if (!confirm('هل أنت متأكد من حذف هذا الملف؟')) return;
+            
+            try {
+                // حذف من Firestore
+                await db.collection('files').doc(fileId).delete();
+                
+                // حذف من Storage
+                if (storagePath) {
+                    await storage.ref().child(storagePath).delete();
+                }
+                
+                showNotification('تم حذف الملف بنجاح!', 'success');
+                await loadFiles();
+            } catch (error) {
+                showNotification('خطأ في حذف الملف: ' + error.message, 'error');
+            }
+        }
+
+        function shareFile(url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'مشاركة ملف',
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    showNotification('تم نسخ رابط الملف!', 'success');
+                });
+            }
+        }
+
+        // الدوال المساعدة
+        function getFileIcon(type) {
+            if (type.includes('image')) return '🖼️';
+            if (type.includes('pdf')) return '📄';
+            if (type.includes('zip') || type.includes('rar')) return '📦';
+            if (type.includes('video')) return '🎬';
+            if (type.includes('audio')) return '🎵';
+            if (type.includes('text') || type.includes('document')) return '📝';
+            return '📁';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(date) {
+            if (!date) return 'غير معروف';
+            return new Date(date).toLocaleDateString('ar-EG');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // إعداد مستمعي الأحداث
+        uploadArea.addEventListener('click', () => {
+            if (currentUser) fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (currentUser) uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (currentUser && e.dataTransfer.files.length) {
+                const files = Array.from(e.dataTransfer.files);
+                files.forEach(file => uploadFile(file));
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (currentUser && fileInput.files.length) {
+                const files = Array.from(fileInput.files);
+                files.forEach(file => uploadFile(file));
+            }
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            if (currentUser) fileInput.click();
+        });
+
+        loginBtn.addEventListener('click', login);
+        logoutBtn.addEventListener('click', logout);
+
+        searchInput.addEventListener('input', displayFiles);
+        sortSelect.addEventListener('change', displayFiles);
+
+        // تهيئة التطبيق
+        initAuth();
+    </script>
+</body>
+</html>
